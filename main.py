@@ -1,3 +1,4 @@
+import os
 from fastapi import FastAPI, HTTPException, status, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from config.database import engine, get_db
@@ -5,12 +6,18 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 import config.models as models
 from config.schemas import employeeCreate, employeeUpdate
+from dotenv import load_dotenv
+
+load_dotenv()
+
+localhost_frontend = os.getenv('LOCALHOST_FRONTEND')
+localhost_backend = os.getenv('LOCALHOST_BACKEND')
 
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
-origins = ["http://localhost:5173", "http://localhost:8000"]
+origins = [localhost_frontend, localhost_backend]
 
 app.add_middleware(
     CORSMiddleware,
