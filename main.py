@@ -4,11 +4,21 @@ from config.database import engine, get_db
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 import config.models as models
-from config.schemas import employeeCreate
+from config.schemas import employeeCreate, employeeUpdate
 
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
+
+origins = ["http://localhost:5173", "http://localhost:8000"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"]
+)
 
 # root page
 @app.get('/')
@@ -74,3 +84,26 @@ def delete_employee_by_id(id: int, db: Session = Depends(get_db)):
     except SQLAlchemyError as e:
         db.rollback()
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error")
+
+@app.put("/employee/{id}", status_code=status.HTTP_200_OK)
+def update_employee_by_id(id: int, emp: employeeUpdate, db: Session = Depends(get_db)):
+    try:
+        employee = db.query(models.Employee).filter(models.Employee.id == id).first()
+        
+        if not employee:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No employee found")
+
+        update_data = emp.dict(exclude_unset=True)
+
+        for key, value in update_data.items():
+            setattr(employee, key, value)
+        
+        db.commit()
+        db.refresh(employee)
+
+        return {'detail': f'Employee with id {id} has been update', "employee": employee}       
+        
+    except SQLAlchemyError as e:
+        db.rollback()
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error")
+    
