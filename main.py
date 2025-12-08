@@ -8,19 +8,17 @@ import config.models as models
 from config.schemas import employeeCreate, employeeUpdate
 from dotenv import load_dotenv
 
-load_dotenv()
-
-localhost_frontend = os.getenv('LOCALHOST_FRONTEND')
 localhost_backend = os.getenv('LOCALHOST_BACKEND')
+localhost_frontend = os.getenv('LOCALHOST_FRONTEND')
 
 models.Base.metadata.create_all(bind=engine)
 
+origins: list[str] = list(o for o in [localhost_backend, localhost_frontend] if o)
+
 app = FastAPI()
 
-origins = [localhost_frontend, localhost_backend]
-
 app.add_middleware(
-    CORSMiddleware,
+    CORSMiddleware, 
     allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
@@ -40,7 +38,8 @@ def create_employee(employee: employeeCreate, db: Session = Depends(get_db)):
         lastname = employee.lastname,
         email = employee.email,
         salary = employee.salary,
-        role = employee.role
+        role = employee.role,
+        status = employee.status
     )
 
     db.add(db_employee)

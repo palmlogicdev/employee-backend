@@ -6,6 +6,7 @@ class employeeCreate(BaseModel):
     email: str
     salary: int
     role: str
+    status: str
 
 class employeeUpdate(BaseModel):
     firstname: str
@@ -13,3 +14,4 @@ class employeeUpdate(BaseModel):
     email: str
     salary: int
     role: str
+    status: str

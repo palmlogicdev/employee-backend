@@ -10,3 +10,4 @@ class Employee(Base):
     email = Column(String(255), unique=True, nullable=False, index=True)
     salary = Column(Integer, nullable=False)
     role = Column(String(255), nullable=False)
+    status = Column(String(255), nullable=False)
